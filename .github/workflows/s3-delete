@@ -1,0 +1,42 @@
+name: S3 Delete
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "s3/**"
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Delete S3 objects for files removed in this push
+        env:
+          BUCKET: ${{ secrets.S3_BUCKET }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # Find deleted files under s3/ between before..after
+          deleted=$(git diff --name-status "$BEFORE" "$AFTER" -- 's3/**' | awk '$1=="D"{print $2}')
+
+          if [ -z "$deleted" ]; then
+            echo "No deletions to process."
+            exit 0
+          fi
+
+          echo "$deleted" | while read -r path; do
+            # path is like: s3/foo/bar.png
+            echo "Deleting s3://$BUCKET/$path"
+            aws s3 rm "s3://$BUCKET/$path"
+          done
