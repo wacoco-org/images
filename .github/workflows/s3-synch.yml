@@ -1,10 +1,10 @@
-name: Upload one image to S3
+name: Upload images to S3 (recursive)
 
 on:
   push:
     branches: ["main"]
     paths:
-      - "s3/example.png"
+      - "s3/**"
 
 jobs:
   upload:
@@ -20,8 +20,19 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Upload s3/example.png to S3 bucket under s3/example.png
+      - name: Sync s3/ folder to S3 bucket under /s3
         run: |
-          aws s3 cp "s3/example.png" "s3://${{ secrets.S3_BUCKET }}/s3/example.png" \
-            --content-type "image/png" \
+          aws s3 sync s3 "s3://${{ secrets.S3_BUCKET }}/s3" \
+            --delete \
+            --exclude "*" \
+            --include "*.png" \
+            --include "*.jpg" \
+            --include "*.jpeg" \
+            --include "*.gif" \
+            --include "*.webp" \
+            --include "*.svg" \
+            --include "*.avif" \
+            --include "*.bmp" \
+            --include "*.tif" \
+            --include "*.tiff" \
             --cache-control "public, max-age=31536000, immutable"
