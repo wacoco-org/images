@@ -17,7 +17,7 @@ jobs:
 
       - name: Sync (upload only)
         run: |
-          aws s3 sync s3 "s3://${{ secrets.S3_BUCKET }}/s3" \
+          aws s3 sync s3 "s3://${{ secrets.S3_BUCKET }}/" \
             --exclude "*" \
             --include "*.png" \
             --include "*.jpg" \
