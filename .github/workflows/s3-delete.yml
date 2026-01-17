@@ -1,9 +1,7 @@
 name: S3 Delete
+
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "s3/**"
+  workflow_call:
 
 jobs:
   delete:
@@ -27,7 +25,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Find deleted files under s3/ between before..after
           deleted=$(git diff --name-status "$BEFORE" "$AFTER" -- 's3/**' | awk '$1=="D"{print $2}')
 
           if [ -z "$deleted" ]; then
@@ -36,7 +33,6 @@ jobs:
           fi
 
           echo "$deleted" | while read -r path; do
-            # path is like: s3/foo/bar.png
             echo "Deleting s3://$BUCKET/$path"
             aws s3 rm "s3://$BUCKET/$path"
           done
