@@ -1,0 +1,38 @@
+name: S3 Folder Indexes (reusable)
+
+on:
+  workflow_call:
+
+jobs:
+  indexes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build per-folder JSON indexes
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          # Optional: set if you use CloudFront/custom domain, e.g. https://cdn.example.com
+          # PUBLIC_BASE_URL: https://cdn.example.com
+          S3_KEY_PREFIX: s3
+        run: node scripts/build-folder-indexes.js
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload JSON indexes to S3 under /s3
+        run: |
+          aws s3 cp generated-indexes "s3://${{ secrets.S3_BUCKET }}/s3/" \
+            --recursive \
+            --exclude "*" \
+            --include "*.json" \
+            --content-type "application/json" \
+            --cache-control "no-cache"
