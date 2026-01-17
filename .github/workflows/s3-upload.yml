@@ -1,10 +1,7 @@
 name: S3 Upload
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "s3/**"
+  workflow_call:
 
 jobs:
   upload:
