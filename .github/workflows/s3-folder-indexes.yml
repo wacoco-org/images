@@ -20,7 +20,7 @@ jobs:
           # Optional: set if you use CloudFront/custom domain, e.g. https://cdn.example.com
           # PUBLIC_BASE_URL: https://cdn.example.com
           S3_KEY_PREFIX: s3
-        run: node scripts/build-folder-indexes.js
+        run: node scripts/build-folder-indexes.cjs
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
