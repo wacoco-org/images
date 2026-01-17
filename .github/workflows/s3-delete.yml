@@ -1,4 +1,4 @@
-name: S3 Delete
+name: S3 Delete (reusable)
 
 on:
   workflow_call:
@@ -19,7 +19,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Delete S3 objects removed in this push (compare previous tree to new)
+      - name: Delete S3 objects removed in this push
         env:
           BUCKET: ${{ secrets.S3_BUCKET }}
           BEFORE: ${{ github.event.before }}
@@ -27,14 +27,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          # If BEFORE is missing/invalid (rare), fall back to previous commit
+          # fallback if BEFORE is missing (rare)
           if ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
             BEFORE="$(git rev-parse "$AFTER^")"
           fi
 
           echo "Diff range: $BEFORE..$AFTER"
 
-          # Files deleted anywhere in the push range under s3/
           deleted=$(
             git diff --name-status "$BEFORE" "$AFTER" -- 's3/**' \
               | awk '$1=="D"{print $2}'
@@ -45,7 +44,9 @@ jobs:
             exit 0
           fi
 
-          echo "$deleted" | while read -r path; do
-            echo "Deleting s3://$BUCKET/$path"
-            aws s3 rm "s3://$BUCKET/$path" || true
+          echo "$deleted" | while read -r repo_path; do
+            # repo_path like: s3/food/a.webp  -> bucket key: food/a.webp
+            key="${repo_path#s3/}"
+            echo "Deleting s3://$BUCKET/$key"
+            aws s3 rm "s3://$BUCKET/$key" || true
           done

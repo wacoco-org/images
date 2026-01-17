@@ -1,4 +1,4 @@
-name: S3 Upload
+name: S3 Upload (reusable)
 
 on:
   workflow_call:
@@ -7,17 +7,19 @@ jobs:
   upload:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Sync (upload only)
+      - name: Sync repo s3/ to bucket root (upload/update only)
         run: |
-          aws s3 sync s3 "s3://${{ secrets.S3_BUCKET }}/" \
+          aws s3 sync s3 "s3://${{ secrets.S3_BUCKET }}" \
             --exclude "*" \
             --include "*.png" \
             --include "*.jpg" \

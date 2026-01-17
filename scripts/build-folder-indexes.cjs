@@ -6,7 +6,6 @@ const OUT_DIR = path.join(process.cwd(), "generated-indexes");
 
 const S3_BUCKET = process.env.S3_BUCKET;
 const AWS_REGION = process.env.AWS_REGION;
-const KEY_PREFIX = process.env.S3_KEY_PREFIX || "s3";
 
 const PUBLIC_BASE_URL =
     process.env.PUBLIC_BASE_URL ||
@@ -36,7 +35,7 @@ function walk(dirAbs, relBase, app) {
         }
 
         if (e.isFile() && isImage(e.name)) {
-            const key = `${KEY_PREFIX}/${rel}`;
+            const key = rel; // bucket key has NO s3/ prefix
             out.push({
                 app,
                 key,
@@ -73,6 +72,13 @@ function main() {
         index.push(...walk(abs, folder, folder));
     }
 
+    // stable ordering
+    index.sort((a, b) => {
+        const appCmp = (a.app || "").localeCompare(b.app || "");
+        if (appCmp !== 0) return appCmp;
+        return (a.key || "").localeCompare(b.key || "");
+    });
+
     const output = `// AUTO-GENERATED — DO NOT EDIT
 // Generated at ${new Date().toISOString()}
 
@@ -81,15 +87,8 @@ const IMAGE_INDEX = ${JSON.stringify(index, null, 2)};
 export default IMAGE_INDEX;
 `;
 
-    fs.writeFileSync(
-        path.join(OUT_DIR, "index.js"),
-        output,
-        "utf8"
-    );
-
-    console.log(
-        `generated-indexes/index.js written (${index.length} entries)`
-    );
+    fs.writeFileSync(path.join(OUT_DIR, "index.js"), output, "utf8");
+    console.log(`generated-indexes/index.js written (${index.length} entries)`);
 }
 
 main();
