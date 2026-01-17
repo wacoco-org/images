@@ -7,20 +7,60 @@ export default {
 
 const mockData = [
     {
-        app: "food",
-        key: "food/bap_kitchen_01.webp",
-        url: "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/food/bap_kitchen_01.webp",
+        "app": "bap-kitchen",
+        "key": "bap-kitchen/bap_kitchen_01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bap-kitchen/bap_kitchen_01.webp"
     },
     {
-        app: "food",
-        key: "food/bap_kitchen_02.webp",
-        url: "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/food/bap_kitchen_02.webp",
+        "app": "bap-kitchen",
+        "key": "bap-kitchen/bap_kitchen_02.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bap-kitchen/bap_kitchen_02.webp"
     },
     {
-        app: "bap-kitchen",
-        key: "bap-kitchen/bap_kitchen_01.webp",
-        url: "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bap-kitchen/bap_kitchen_01.webp",
+        "app": "bap-kitchen",
+        "key": "bap-kitchen/bap_kitchen_ddukbokggi.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bap-kitchen/bap_kitchen_ddukbokggi.webp"
     },
+    {
+        "app": "bap-kitchen",
+        "key": "bap-kitchen/bap_kitchen_drink01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bap-kitchen/bap_kitchen_drink01.webp"
+    },
+    {
+        "app": "bop-kitchen",
+        "key": "bop-kitchen/bap_kitchen_01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bop-kitchen/bap_kitchen_01.webp"
+    },
+    {
+        "app": "bop-kitchen",
+        "key": "bop-kitchen/bap_kitchen_02.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bop-kitchen/bap_kitchen_02.webp"
+    },
+    {
+        "app": "bop-kitchen",
+        "key": "bop-kitchen/bap_kitchen_ddukbokggi.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bop-kitchen/bap_kitchen_ddukbokggi.webp"
+    },
+    {
+        "app": "bop-kitchen",
+        "key": "bop-kitchen/bap_kitchen_drink01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/bop-kitchen/bap_kitchen_drink01.webp"
+    },
+    {
+        "app": "food",
+        "key": "food/bap_kitchen_01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/food/bap_kitchen_01.webp"
+    },
+    {
+        "app": "food",
+        "key": "food/bap_kitchen_02.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/food/bap_kitchen_02.webp"
+    },
+    {
+        "app": "food",
+        "key": "food/bap_kitchen_drink01.webp",
+        "url": "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/food/bap_kitchen_drink01.webp"
+    }
 ];
 
 function mockFetchOnce(data) {
