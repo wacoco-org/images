@@ -33,5 +33,5 @@ jobs:
       - name: Upload index.js to bucket root
         run: |
           aws s3 cp generated-indexes/index.js "s3://${{ secrets.S3_BUCKET }}/index.json" \
-            --content-type "application/json" \
+            --content-type "application/javascript" \
             --cache-control "no-cache"
