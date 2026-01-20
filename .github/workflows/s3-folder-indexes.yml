@@ -28,8 +28,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Upload index.js to bucket root
+      - name: Upload index.json to bucket root
         run: |
-          aws s3 cp generated-indexes/index.js "s3://${{ secrets.S3_BUCKET }}/index.js" \
-            --content-type "application/javascript" \
-            --cache-control "no-cache"
+          aws s3 cp generated-indexes/index.json "s3://${{ secrets.S3_BUCKET }}/index.json" \
+            --content-type "application/json" \
+            --cache-control "no-cache" \
+            --metadata-directive REPLACE
+      

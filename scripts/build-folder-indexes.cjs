@@ -12,7 +12,16 @@ const PUBLIC_BASE_URL =
     `https://${S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com`;
 
 const IMAGE_EXTS = new Set([
-    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg", ".avif", ".bmp", ".tif", ".tiff",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".gif",
+    ".webp",
+    ".svg",
+    ".avif",
+    ".bmp",
+    ".tif",
+    ".tiff",
 ]);
 
 function isImage(name) {
@@ -79,16 +88,9 @@ function main() {
         return (a.key || "").localeCompare(b.key || "");
     });
 
-    const output = `// AUTO-GENERATED — DO NOT EDIT
-// Generated at ${new Date().toISOString()}
-
-const IMAGE_INDEX = ${JSON.stringify(index, null, 2)};
-
-export default IMAGE_INDEX;
-`;
-
-    fs.writeFileSync(path.join(OUT_DIR, "index.js"), output, "utf8");
-    console.log(`generated-indexes/index.js written (${index.length} entries)`);
+    const outPath = path.join(OUT_DIR, "index.json");
+    fs.writeFileSync(outPath, JSON.stringify(index, null, 2) + "\n", "utf8");
+    console.log(`generated-indexes/index.json written (${index.length} entries)`);
 }
 
 main();

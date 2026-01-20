@@ -2,8 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Images from "./Images";
 
 const INDEX_URL =
-    "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/index.js";
-const GLOBAL_NAME = "__IMAGE_INDEX__";
+    "https://hansik-dummy-images.s3.eu-north-1.amazonaws.com/index.json";
 
 export default function Gallery({
                                     pollMs = 15000,
@@ -15,11 +14,13 @@ export default function Gallery({
 
     const lastEtagRef = useRef(null);
     const lastModifiedRef = useRef(null);
+    const timerRef = useRef(null);
+    const unmountedRef = useRef(false);
 
-    async function loadIndexViaScript({ useCacheBuster = false } = {}) {
+    async function fetchIndex({ useCacheBuster = false } = {}) {
         const url = useCacheBuster ? `${INDEX_URL}?t=${Date.now()}` : INDEX_URL;
 
-        // HEAD change-detection (optional)
+        // lightweight check first
         if (onlyIfChanged) {
             try {
                 const head = await fetch(url, { method: "HEAD", cache: "no-store" });
@@ -35,40 +36,23 @@ export default function Gallery({
                         lastMod === lastModifiedRef.current;
 
                     if (sameEtag || sameLastMod) return; // no change
-
-                    if (etag) lastEtagRef.current = etag;
-                    if (lastMod) lastModifiedRef.current = lastMod;
                 }
             } catch {
-                // ignore; still try to load script
+                // ignore HEAD failures; fall back to GET
             }
         }
 
-        // Clear previous value so we can detect a bad load
-        delete window[GLOBAL_NAME];
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error(`Failed to load index (${res.status})`);
 
-        await new Promise((resolve, reject) => {
-            const s = document.createElement("script");
-            s.src = url;
-            s.async = true;
+        const etag = res.headers.get("etag");
+        const lastMod = res.headers.get("last-modified");
+        if (etag) lastEtagRef.current = etag;
+        if (lastMod) lastModifiedRef.current = lastMod;
 
-            s.onload = () => {
-                s.remove();
-                resolve();
-            };
-            s.onerror = () => {
-                s.remove();
-                reject(new Error(`Failed to load script: ${INDEX_URL}`));
-            };
-
-            document.head.appendChild(s);
-        });
-
-        const data = window[GLOBAL_NAME];
+        const data = await res.json();
         if (!Array.isArray(data)) {
-            throw new Error(
-                `index.js loaded but window.${GLOBAL_NAME} was not an array (did you generate window.${GLOBAL_NAME} = [...] ?) `
-            );
+            throw new Error("index.json is not an array");
         }
 
         setItems(data);
@@ -76,24 +60,26 @@ export default function Gallery({
     }
 
     useEffect(() => {
-        let cancelled = false;
-        let timer = null;
+        unmountedRef.current = false;
 
         const tick = async (first = false) => {
             try {
-                await loadIndexViaScript({ useCacheBuster: first && fastFirstLoad });
+                await fetchIndex({ useCacheBuster: first && fastFirstLoad });
             } catch (e) {
-                if (!cancelled) setError(e?.message || "Failed to load index");
+                if (!unmountedRef.current)
+                    setError(e?.message || "Failed to load index");
             } finally {
-                if (!cancelled) timer = setTimeout(() => tick(false), pollMs);
+                if (!unmountedRef.current) {
+                    timerRef.current = setTimeout(() => tick(false), pollMs);
+                }
             }
         };
 
         tick(true);
 
         return () => {
-            cancelled = true;
-            if (timer) clearTimeout(timer);
+            unmountedRef.current = true;
+            if (timerRef.current) clearTimeout(timerRef.current);
         };
     }, [pollMs, fastFirstLoad, onlyIfChanged]);
 
