@@ -9,8 +9,13 @@ import { playwright } from "@vitest/browser-playwright";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// For GitHub Pages: set VITE_BASE in CI, e.g. "/your-repo/"
-const base = process.env.VITE_BASE || "/";
+const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+
+const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
+const defaultGhPagesBase =
+    repo && repo.endsWith(".github.io") ? "/" : repo ? `/${repo}/` : "/";
+
+const base = process.env.VITE_BASE ?? (isCI ? defaultGhPagesBase : "/");
 
 export default defineConfig({
   base,
